@@ -1,5 +1,3 @@
-# RAW Code, feel free to edit it or build upon it.
-
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk, scrolledtext
 import os
