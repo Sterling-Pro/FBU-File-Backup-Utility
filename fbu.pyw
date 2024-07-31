@@ -12,7 +12,7 @@ from datetime import datetime
 class BackupGUI:
     def __init__(self, master):
         self.master = master
-        master.title("ALLBack File and Folder Backup Utility")
+        master.title("File and Folder Backup Utility")
         master.geometry("600x700") 
 
         self.json_file = 'directorypull.json'
