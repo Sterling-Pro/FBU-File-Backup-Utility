@@ -1,3 +1,5 @@
+# Version 1.0.6
+
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk, scrolledtext
 import os
