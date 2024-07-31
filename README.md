@@ -1,0 +1,2 @@
+TO USE - 
+Place .pyw file in any directory, and double click it. Select up to 3 backup destinations, and press "Backup Files or Backup Folders" - if you wish for the program to remember which destinations you chose and re-use them by default, click on "Save Destinations", and it will create a .JSON file named 'directorypull.JSON' which stores the selected destination directories for later use. It will create a log file (toggleable in the GUI) inside of a folder in the working directory called "backup_logs" (on by default, and will create the folder upon opening the program)
