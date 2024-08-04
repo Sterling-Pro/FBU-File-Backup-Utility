@@ -1,5 +1,6 @@
-# version 1.0.7
+# version 1.0.8
 # author Sterling-Pro
+
 import tkinter as tk
 from tkinter import filedialog, messagebox
 import customtkinter
@@ -16,26 +17,43 @@ customtkinter.set_default_color_theme("dark-blue")
 class BackupGUI(customtkinter.CTk):
     def __init__(self):
         super().__init__()
-
-        self.title("ALLBack File and Folder Backup Utility")
-        self.geometry("900x600")
-
+        self.title("File Backup Utility v1.0.8")
+        self.geometry("900x900")
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=1)
-
         self.json_file = 'directorypull.json'
         self.destinations = ["", "", ""]
         self.entries = []
         self.load_destinations()
-
         self.create_widgets()
 
     def create_widgets(self):
+        # Source directory selection
+        self.source_frame = customtkinter.CTkFrame(self)
+        self.source_frame.grid(row=0, column=0, padx=20, pady=(20, 10), sticky="ew")
+        self.source_frame.grid_columnconfigure(1, weight=1)
+
+        # Working Directory Option
+        self.working_dir_frame = customtkinter.CTkFrame(self.source_frame)
+        self.working_dir_frame.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
+        self.use_working_dir = tk.BooleanVar(value=True)
+        customtkinter.CTkLabel(self.working_dir_frame, text="Use Working Directory:").grid(row=0, column=0, padx=5, pady=5, sticky="w")
+        self.working_dir_checkbox = customtkinter.CTkCheckBox(self.working_dir_frame, text="", variable=self.use_working_dir, command=self.toggle_source_entry)
+        self.working_dir_checkbox.grid(row=0, column=1, padx=5, pady=5, sticky="w")
+
+        # Specified Source Directory Option
+        self.specified_dir_frame = customtkinter.CTkFrame(self.source_frame)
+        self.specified_dir_frame.grid(row=1, column=0, padx=5, pady=5, sticky="ew")
+        customtkinter.CTkLabel(self.specified_dir_frame, text="Use Specified Source Directory:").grid(row=0, column=0, padx=5, pady=5, sticky="w")
+        self.source_entry = customtkinter.CTkEntry(self.specified_dir_frame, width=300, state="disabled")
+        self.source_entry.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
+        self.source_browse_button = customtkinter.CTkButton(self.specified_dir_frame, text="Browse", width=80, command=self.browse_source_directory, fg_color="silver", text_color="black", state="disabled")
+        self.source_browse_button.grid(row=0, column=2, padx=5, pady=5)
+
         # Top frame for destinations
         self.top_frame = customtkinter.CTkFrame(self)
-        self.top_frame.grid(row=0, column=0, padx=20, pady=20, sticky="ew")
+        self.top_frame.grid(row=1, column=0, padx=20, pady=10, sticky="ew")
         self.top_frame.grid_columnconfigure(1, weight=1)
-
         customtkinter.CTkLabel(self.top_frame, text="Backup Destinations", font=("Arial", 16, "bold")).grid(row=0, column=0, columnspan=3, pady=(0, 10))
 
         for i in range(3):
@@ -48,7 +66,7 @@ class BackupGUI(customtkinter.CTk):
 
         # Main content frame
         self.main_frame = customtkinter.CTkFrame(self)
-        self.main_frame.grid(row=1, column=0, padx=20, pady=(0, 20), sticky="nsew")
+        self.main_frame.grid(row=2, column=0, padx=20, pady=(0, 20), sticky="nsew")
         self.main_frame.grid_columnconfigure(0, weight=1)
         self.main_frame.grid_rowconfigure(0, weight=1)
 
@@ -59,25 +77,34 @@ class BackupGUI(customtkinter.CTk):
 
         # Bottom frame for buttons and progress bars
         self.bottom_frame = customtkinter.CTkFrame(self)
-        self.bottom_frame.grid(row=2, column=0, padx=20, pady=(0, 20), sticky="ew")
-        self.bottom_frame.grid_columnconfigure((0, 1, 2), weight=1)
-
+        self.bottom_frame.grid(row=3, column=0, padx=20, pady=(0, 20), sticky="ew")
+        self.bottom_frame.grid_columnconfigure((0, 1), weight=1)
         customtkinter.CTkButton(self.bottom_frame, text="Save Destinations", command=self.save_destinations, fg_color="silver", text_color="black").grid(row=0, column=0, padx=5, pady=10)
-        customtkinter.CTkButton(self.bottom_frame, text="Backup Files", command=lambda: self.start_backup('files'), fg_color="silver", text_color="black").grid(row=0, column=1, padx=5, pady=10)
-        customtkinter.CTkButton(self.bottom_frame, text="Backup Folders", command=lambda: self.start_backup('folders'), fg_color="silver", text_color="black").grid(row=0, column=2, padx=5, pady=10)
-
-        customtkinter.CTkLabel(self.bottom_frame, text="Overall Progress:").grid(row=1, column=0, columnspan=3, pady=(10, 0))
+        customtkinter.CTkButton(self.bottom_frame, text="Backup All Files + Folders", command=lambda: self.start_backup('all'), fg_color="silver", text_color="black").grid(row=0, column=1, padx=5, pady=10)
+        customtkinter.CTkLabel(self.bottom_frame, text="Overall Progress:").grid(row=1, column=0, columnspan=2, pady=(10, 0))
         self.overall_progress_bar = customtkinter.CTkProgressBar(self.bottom_frame)
-        self.overall_progress_bar.grid(row=2, column=0, columnspan=3, padx=10, pady=(0, 10), sticky="ew")
-
-        customtkinter.CTkLabel(self.bottom_frame, text="Current File Progress:").grid(row=3, column=0, columnspan=3, pady=(10, 0))
+        self.overall_progress_bar.grid(row=2, column=0, columnspan=2, padx=10, pady=(0, 10), sticky="ew")
+        customtkinter.CTkLabel(self.bottom_frame, text="Current File Progress:").grid(row=3, column=0, columnspan=2, pady=(10, 0))
         self.current_file_progress_bar = customtkinter.CTkProgressBar(self.bottom_frame)
-        self.current_file_progress_bar.grid(row=4, column=0, columnspan=3, padx=10, pady=(0, 10), sticky="ew")
-
+        self.current_file_progress_bar.grid(row=4, column=0, columnspan=2, padx=10, pady=(0, 10), sticky="ew")
         self.logging_enabled = tk.BooleanVar(value=True)
-        customtkinter.CTkCheckBox(self.bottom_frame, text="Enable Logging", variable=self.logging_enabled).grid(row=5, column=0, columnspan=3, pady=10)
+        customtkinter.CTkCheckBox(self.bottom_frame, text="Enable Logging", variable=self.logging_enabled).grid(row=5, column=0, columnspan=2, pady=10)
 
         self.setup_log_file()
+
+    def toggle_source_entry(self):
+        if self.use_working_dir.get():
+            self.source_entry.configure(state="disabled")
+            self.source_browse_button.configure(state="disabled")
+        else:
+            self.source_entry.configure(state="normal")
+            self.source_browse_button.configure(state="normal")
+
+    def browse_source_directory(self):
+        directory = filedialog.askdirectory()
+        if directory:
+            self.source_entry.delete(0, tk.END)
+            self.source_entry.insert(0, directory)
 
     def setup_log_file(self):
         log_directory = "backup_logs"
@@ -169,8 +196,15 @@ class BackupGUI(customtkinter.CTk):
             messagebox.showwarning("Warning", "Please select at least one destination directory.")
             return
 
-        working_directory_size = self.get_directory_size('.')
-        self.log_message(f"Working directory size: {working_directory_size:.2f} MB")
+        # Determine the source directory based on the checkbox state
+        source_directory = os.getcwd() if self.use_working_dir.get() else self.source_entry.get()
+        
+        if not self.use_working_dir.get() and not source_directory:
+            messagebox.showwarning("Warning", "Please select a source directory.")
+            return
+
+        working_directory_size = self.get_directory_size(source_directory)
+        self.log_message(f"Source directory size: {working_directory_size:.2f} MB")
 
         for destination in active_destinations:
             free_space = self.get_free_space(destination)
@@ -179,13 +213,15 @@ class BackupGUI(customtkinter.CTk):
                 messagebox.showwarning("Warning", f"Not enough space on {destination}. Required: {working_directory_size:.2f} MB, Available: {free_space:.2f} MB")
                 return
 
-        if backup_type == 'files':
-            items = [f for f in os.listdir('.') if os.path.isfile(f)]
-        else:  # folders
-            items = self.get_all_files('.')
+        items = []
+        for root, dirs, files in os.walk(source_directory):
+            for file in files:
+                items.append(os.path.join(root, file))
+            for dir in dirs:
+                items.append(os.path.join(root, dir))
 
         if not items:
-            self.log_message(f"No {backup_type} found in the current directory.")
+            self.log_message("No items found in the source directory.")
             return
 
         total_items = len(items) * len(active_destinations)
@@ -195,9 +231,13 @@ class BackupGUI(customtkinter.CTk):
             self.log_message(f"Processing: {item}")
             for destination in active_destinations:
                 try:
-                    dest_path = os.path.join(destination, os.path.relpath(item, '.'))
-                    os.makedirs(os.path.dirname(dest_path), exist_ok=True)
-                    self.copy_file_with_progress(item, dest_path)
+                    dest_path = os.path.join(destination, os.path.relpath(item, source_directory))
+                    if os.path.isdir(item):
+                        os.makedirs(dest_path, exist_ok=True)
+                        self.log_message(f" Created directory: {dest_path}")
+                    else:
+                        os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+                        self.copy_file_with_progress(item, dest_path)
                     items_copied += 1
                     self.overall_progress_bar.set(items_copied / total_items)
                     self.log_message(f" Copied to: {destination}")
@@ -205,10 +245,10 @@ class BackupGUI(customtkinter.CTk):
                     error_message = f"Failed to copy {item} to {destination}. Error: {str(e)}"
                     self.log_message(f" Error: {error_message}")
                     messagebox.showerror("Error", error_message)
+                    self.current_file_progress_bar.set(0)
+                    self.update_idletasks()
 
-        self.current_file_progress_bar.set(0)
-        self.update_idletasks()
-        self.log_message(f"{backup_type.capitalize()} backup complete. {items_copied} out of {total_items} items copied successfully.")
+        self.log_message(f"Backup complete. {items_copied} out of {total_items} items copied successfully.")
         self.log_message("Backup completed")
         self.overall_progress_bar.set(1)
 
