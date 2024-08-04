@@ -1,4 +1,16 @@
-## Instructions 
+## Instructions
+
+Firstly, install the libraries that don't come with Python by default, you'll need to use pip, Python's package installer. So far the only library FBU uses as of v1.0.8 is customtkinter, so you'll do the following:
+
+1. Open a command prompt or terminal.
+2. Run the following command to install customtkinter:
+
+`pip install customtkinter`
+
+That's it! All other libraries used in this script (tkinter, os, shutil, json, threading, platform, and datetime) are part of Python's standard library and don't require separate installation.
+
+### Usage Instructions:
+
 To back up all files and/or folders in a working directory:
 1. Place the `fbu.pyw` file in the directory, and open it - alternatively uncheck the "Use Working Directory" Box and you can specify any directory to copy from without placing the .pyw file in the input folder.
 2. Select up to 3 backup destinations
