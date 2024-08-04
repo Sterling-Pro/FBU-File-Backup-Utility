@@ -1,6 +1,5 @@
 # version 1.0.7
 # author Sterling-Pro
-
 import tkinter as tk
 from tkinter import filedialog, messagebox
 import customtkinter
@@ -17,15 +16,18 @@ customtkinter.set_default_color_theme("dark-blue")
 class BackupGUI(customtkinter.CTk):
     def __init__(self):
         super().__init__()
-        self.title("Folder Backup Utility v1.0.7")
+
+        self.title("ALLBack File and Folder Backup Utility")
         self.geometry("900x600")
-        self.iconbitmap("fbuicon.ico")  # Set the icon to "fbuicon.ico" in the working directory
+
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=1)
+
         self.json_file = 'directorypull.json'
         self.destinations = ["", "", ""]
         self.entries = []
         self.load_destinations()
+
         self.create_widgets()
 
     def create_widgets(self):
@@ -33,7 +35,9 @@ class BackupGUI(customtkinter.CTk):
         self.top_frame = customtkinter.CTkFrame(self)
         self.top_frame.grid(row=0, column=0, padx=20, pady=20, sticky="ew")
         self.top_frame.grid_columnconfigure(1, weight=1)
+
         customtkinter.CTkLabel(self.top_frame, text="Backup Destinations", font=("Arial", 16, "bold")).grid(row=0, column=0, columnspan=3, pady=(0, 10))
+
         for i in range(3):
             customtkinter.CTkLabel(self.top_frame, text=f"Destination {i+1}:").grid(row=i+1, column=0, padx=5, pady=5, sticky="e")
             entry = customtkinter.CTkEntry(self.top_frame, width=300)
@@ -57,17 +61,22 @@ class BackupGUI(customtkinter.CTk):
         self.bottom_frame = customtkinter.CTkFrame(self)
         self.bottom_frame.grid(row=2, column=0, padx=20, pady=(0, 20), sticky="ew")
         self.bottom_frame.grid_columnconfigure((0, 1, 2), weight=1)
+
         customtkinter.CTkButton(self.bottom_frame, text="Save Destinations", command=self.save_destinations, fg_color="silver", text_color="black").grid(row=0, column=0, padx=5, pady=10)
         customtkinter.CTkButton(self.bottom_frame, text="Backup Files", command=lambda: self.start_backup('files'), fg_color="silver", text_color="black").grid(row=0, column=1, padx=5, pady=10)
         customtkinter.CTkButton(self.bottom_frame, text="Backup Folders", command=lambda: self.start_backup('folders'), fg_color="silver", text_color="black").grid(row=0, column=2, padx=5, pady=10)
+
         customtkinter.CTkLabel(self.bottom_frame, text="Overall Progress:").grid(row=1, column=0, columnspan=3, pady=(10, 0))
         self.overall_progress_bar = customtkinter.CTkProgressBar(self.bottom_frame)
         self.overall_progress_bar.grid(row=2, column=0, columnspan=3, padx=10, pady=(0, 10), sticky="ew")
+
         customtkinter.CTkLabel(self.bottom_frame, text="Current File Progress:").grid(row=3, column=0, columnspan=3, pady=(10, 0))
         self.current_file_progress_bar = customtkinter.CTkProgressBar(self.bottom_frame)
         self.current_file_progress_bar.grid(row=4, column=0, columnspan=3, padx=10, pady=(0, 10), sticky="ew")
+
         self.logging_enabled = tk.BooleanVar(value=True)
         customtkinter.CTkCheckBox(self.bottom_frame, text="Enable Logging", variable=self.logging_enabled).grid(row=5, column=0, columnspan=3, pady=10)
+
         self.setup_log_file()
 
     def setup_log_file(self):
@@ -159,23 +168,29 @@ class BackupGUI(customtkinter.CTk):
         if not active_destinations:
             messagebox.showwarning("Warning", "Please select at least one destination directory.")
             return
+
         working_directory_size = self.get_directory_size('.')
         self.log_message(f"Working directory size: {working_directory_size:.2f} MB")
+
         for destination in active_destinations:
             free_space = self.get_free_space(destination)
             self.log_message(f"Available space on {destination}: {free_space:.2f} MB")
             if working_directory_size > free_space:
                 messagebox.showwarning("Warning", f"Not enough space on {destination}. Required: {working_directory_size:.2f} MB, Available: {free_space:.2f} MB")
                 return
+
         if backup_type == 'files':
             items = [f for f in os.listdir('.') if os.path.isfile(f)]
         else:  # folders
             items = self.get_all_files('.')
+
         if not items:
             self.log_message(f"No {backup_type} found in the current directory.")
             return
+
         total_items = len(items) * len(active_destinations)
         items_copied = 0
+
         for item in items:
             self.log_message(f"Processing: {item}")
             for destination in active_destinations:
@@ -190,6 +205,7 @@ class BackupGUI(customtkinter.CTk):
                     error_message = f"Failed to copy {item} to {destination}. Error: {str(e)}"
                     self.log_message(f" Error: {error_message}")
                     messagebox.showerror("Error", error_message)
+
         self.current_file_progress_bar.set(0)
         self.update_idletasks()
         self.log_message(f"{backup_type.capitalize()} backup complete. {items_copied} out of {total_items} items copied successfully.")
